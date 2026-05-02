@@ -20,6 +20,20 @@ public:
         } // RAII unlocks mutex
         cv_.notify_one();
     }
+
+    // wait_and_pop could remain waiting until queue is destroyed, so return is optional
+    std::optional<T> wait_and_pop() {
+        return NULL;
+    }
+
+    // try_pop could opperate on an empty queue so return is optional
+    std::optional<T> try_pop() {
+        return NULL;
+    }
+
+    bool is_empty() {
+        return true;
+    }
         
 
 private:
