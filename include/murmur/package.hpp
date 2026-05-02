@@ -2,20 +2,40 @@
 
 #include <string>
 #include <chrono>
+#include <vector>
+#include <cstdint>
 
 namespace murmur {
 
-struct Package {
-    std::string body;
-    std::chrono::system_clock::time_point timestamp;
+class Package {
+public:
+    using Clock = std::chrono::system_clock;
+    using TimePoint = Clock::time_point;
 
     Package() = default;
-    explicit Package(std::string msg)
-        : body(std::move(msg)),
-        timestamp(std::chrono::system_clock::now()) {}
-};
+    Package(std::string sender, std::string body);
+    Package(std::string sender, std::string body, TimePoint timestamp);
 
-// TODO: Termporary, will eventually need its own class wrapper with a mutex
-using PackageQueue = std::queue<std::unique_pointer<Package>>;
+    const std:string& sender() const noexcept {
+        return sender_;
+    }
+
+    const std::string& body() const noexcept {
+        return body_;
+    }
+
+    TimePoint timestamp() const noexcept {
+        return timestamp_;
+    }
+
+    std::vector<std::uint8_t> serialize() const;
+
+    static Package deserialize(const std::uint8_t* data, std::size_t size);
+
+private:
+    std::string sender_;
+    std::string body_;
+    TimePoint timestamp_{Clock::now()};
+};
 
 } // namespace murmur
