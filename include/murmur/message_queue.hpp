@@ -1,6 +1,10 @@
 #pragma once
 
 #include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <utility>
 
 namespace murmur {
 
@@ -70,7 +74,7 @@ private:
     mutable std::mutex mutex_;
     std::queue queue_;
     std::condition_variable cv_;
-    std::shutdown_ = false;
+    bool shutdown_ = false;
 
 };
 
