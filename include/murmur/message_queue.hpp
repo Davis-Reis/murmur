@@ -32,7 +32,7 @@ public:
         // RAII on lock to make sure it destructs as soon as I don't need it
         {
             std::lock_guard<std::mutex> lock(mutex_);
-            queue_.push(T);
+            queue_.push(value);
         } // RAII unlocks mutex then destroys it
         cv_.notify_one();
     }
