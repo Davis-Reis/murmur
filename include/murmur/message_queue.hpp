@@ -60,9 +60,17 @@ public:
         return value;
     }
 
-    // try_pop could opperate on an empty queue so return is optional
+    /**
+     * Non-blocking version of wait_and_pop()
+     */
     std::optional<T> try_pop() {
-        return NULL;
+        std::unique_lock<std::mutex lock(mutex_);
+        if (queue_.is_empty()) {
+            return std::nullopt;
+        }
+        T value = std::move(queue_.front());
+        queue_.pop();
+        return value;
     }
 
     bool is_empty() {
