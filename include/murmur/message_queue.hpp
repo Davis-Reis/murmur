@@ -73,8 +73,23 @@ public:
         return value;
     }
 
+    /**
+     * Shutdown function for exit simplicity
+     */
+    void shutdown() {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            shutdown_ = true;
+        }
+        cv_.notify_all();
+    }
+
+    /**
+     * Returns true if this queue is empty, false otherwise
+     */
     bool is_empty() {
-        return true;
+        std::lock_guard<std::mutex> lock(mutex_);
+        return queue_.empty();
     }
         
 
