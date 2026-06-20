@@ -2,16 +2,17 @@
 #include <stdexcept>
 #include <vector>
 
+
 namespace murmur {
 
-    void write_framed(Socket& sock, const void* data, std::size_t size) {
-        if (size > MAX_MESSAGE) {
+    void write_framed(Socket& sock, std::span<const std::uint8_t> data){
+        if (data.size() > MAX_MESSAGE) {
             throw std::length_error("write_framed: message exceeds MAX_MESSAGE");
         }
-        std::uint32_t len = static_cast<std::uint32_t>(size);
+        std::uint32_t len = static_cast<std::uint32_t>(data.size());
         std::uint32_t header = htonl(len);
         sock.write_all(&header, sizeof(header));
-        sock.write_all(data, len);
+        sock.write_all(data.data(), data.size());
     }
 
     std::vector<std::uint8_t> read_framed(Socket& sock) {
