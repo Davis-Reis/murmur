@@ -14,7 +14,7 @@ This will be a from-scratch rewrite of that C program with more contemporary cod
 - client: connects to server. will work almost identically in terms of architecture to the peer-to-peer architecture
 
 ## status
-pre-dev planning
+developing step 1
 
 ## roadmap
 - [ ] Single-threaded TCP echo server and client
