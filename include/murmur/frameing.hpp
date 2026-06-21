@@ -7,10 +7,9 @@ namespace murmur {
 // Writes a databuffer to a socket
 // Params:
 //          sock: socket to be writing to
-//          data: void pointer to data
-//          size: size in bytes of the payload
+//          data: vector of bytes
 // Returns void
-void write_framed(Socket& sock, const void* data, std::size_t size);
+void write_framed(Socket& sock, std::span<std::uint8_t> data);
 
 // Reads all bytes available in socket
 // Params:
