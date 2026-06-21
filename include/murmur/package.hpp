@@ -16,17 +16,11 @@ public:
     Package(std::string sender, std::string body);
     Package(std::string sender, std::string body, TimePoint timestamp);
 
-    const std:string& sender() const noexcept {
-        return sender_;
-    }
+    const std:string& sender() const noexcept;
 
-    const std::string& body() const noexcept {
-        return body_;
-    }
+    const std::string& body() const noexcept;
 
-    TimePoint timestamp() const noexcept {
-        return timestamp_;
-    }
+    TimePoint timestamp() const noexcept;
 
     std::vector<std::uint8_t> serialize() const;
 
