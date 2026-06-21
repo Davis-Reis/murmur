@@ -1,6 +1,7 @@
 #pragma once
 
 #include "socpp.hpp"
+#include "package.hpp"
 
 namespace murmur {
 
@@ -15,3 +16,5 @@ std::vector<std::uint8_t> serialize(const &Package package);
 //          data: raw stream of bytes
 // Returns data deserialized into a package object
 Package deserialize(std::span<uint8_t> data);
+
+} // namespace
