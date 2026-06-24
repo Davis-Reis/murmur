@@ -1,4 +1,7 @@
 #include "serialize.hpp"
+#include <span>
+#include <cstint>
+#include <stdexcept>
 
 namespace murmur {
 
@@ -46,4 +49,33 @@ void append_u64(std::vector<std::uint8_t>& out, uint64_t x) {
     out.push_back(static_cast<std::uint8_t>((x >> 8 ) & 0xFF));
     out.push_back(static_cast<std::uint8_t>((x >> 0 ) & 0xFF));
 }
+
+std::uint32_t read_u32(std::vector<std::uint8_t> buf, std::size_t& offset) {
+    if (buf.size() < 4) {
+        throw std::runtime_error("read_u32: buffer underrun");
+    }
+    std::uint32_t result = (static_cast<std::uint32_t>(buf[0]) << 24)
+        | (static_cast<std::uint32_t>(buf[1]) << 16)
+        | (static_cast<std::uint32_t>(buf[2]) << 8 )
+        | (static_cast<std::uint32_t>(buf[3]) << 0 );
+    buf = buf.subspan(4);
+    return result;
+}
+
+std::uint64_t read_u64(std::vector<std::uint8_t> buf, std::size_t& offset) {
+    if (buf.size() < 4) {
+        throw std::runtime_error("read_u64: buffer underrun");
+    }
+    std::uint32_t result = (static_cast<std::uint32_t>(buf[0]) << 56)
+    | (static_cast<std::uint32_t>(buf[1]) << 48)
+    | (static_cast<std::uint32_t>(buf[2]) << 40)
+    | (static_cast<std::uint32_t>(buf[3]) << 32)
+    | (static_cast<std::uint32_t>(buf[4]) << 24)
+    | (static_cast<std::uint32_t>(buf[5]) << 16)
+    | (static_cast<std::uint32_t>(buf[6]) << 8 )
+    | (static_cast<std::uint32_t>(buf[7]) << 0 );
+    buf = buf.subspan(8);
+    return result;
+}
+    
 } // namespace
