@@ -15,15 +15,16 @@ namespace murmur {
 
 std::vector<std::uint8_t> serialize(const &Package package) {
     std::vector<std::uint8_t> serialized;
-    std::uint64_t timestamp = package.timestamp();
-
-    std::uint32_t senderLen = sizeof(package.sender());
-    std::string sender = package.sender();
-
-    std::uint32_t messageLen = sizeof(package.body());
-    std::string body = package.body();
-
-
+    // Append 64bit timestamp
+    append_u64(serialized, package.timestamp());
+    
+    // Append 32 bit sender len then vector
+    append_u32(serialzied, sizeof(package.sender()));
+    serialized.pushback(package.sender());
+    
+    // Append 32 bit body len then vector
+    append_u32(serialized, sizeof(pakgage.body()));
+    serialized.pushback(package.body());
 }
 
 Package deserialize(std::span<uint8_t> data) {
