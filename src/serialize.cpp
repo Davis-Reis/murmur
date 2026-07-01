@@ -50,6 +50,7 @@ void append_u64(std::vector<std::uint8_t>& out, uint64_t x) {
     out.push_back(static_cast<std::uint8_t>((x >> 0 ) & 0xFF));
 }
 
+// Helper function to translate uint8 vector from network to host bytes
 std::uint32_t read_u32(std::vector<std::uint8_t> buf, std::size_t& offset) {
     if (buf.size() < 4) {
         throw std::runtime_error("read_u32: buffer underrun");
@@ -62,6 +63,7 @@ std::uint32_t read_u32(std::vector<std::uint8_t> buf, std::size_t& offset) {
     return result;
 }
 
+// Helper function to translate uint8 vector from network to host bytes
 std::uint64_t read_u64(std::vector<std::uint8_t> buf, std::size_t& offset) {
     if (buf.size() < 4) {
         throw std::runtime_error("read_u64: buffer underrun");
