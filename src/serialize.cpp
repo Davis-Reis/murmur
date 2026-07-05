@@ -12,19 +12,26 @@ namespace murmur {
 // [ uint32 message len ]                       | 4 bytes
 // [ message bytes ]                            | len bytes
 
+// Package to bytes
+std::vector<std::uint8_t> serialize(const Package& package) {
+    std::vector<std::uint8_t> out;
 
-std::vector<std::uint8_t> serialize(const &Package package) {
-    std::vector<std::uint8_t> serialized;
-    // Append 64bit timestamp
-    append_u64(serialized, package.timestamp());
-    
-    // Append 32 bit sender len then vector
-    append_u32(serialzied, sizeof(package.sender()));
-    serialized.pushback(package.sender());
-    
-    // Append 32 bit body len then vector
-    append_u32(serialized, sizeof(pakgage.body()));
-    serialized.pushback(package.body());
+    // Store the timepoint
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            package.timestamp().time_since_epoch()).count();
+    append_u64(out, static_cast<std::uint64_t>(ms));
+
+    // Store the sender str len then str
+    const std::string& sender = package.sender();
+    append_u32(out, static_cast<std::uint32_t>(sender.size()));
+    out.insert(out.end(), sender.begin(), sender.end());
+
+    // Store the body str len then str
+    const std::string& body = package.body();
+    append_u32(out, static_cast<std::uint32_t>(body.size()));
+    out.insert(out.end(), body.begin(), body.end());
+
+    return out;
 }
 
 Package deserialize(std::span<uint8_t> data) {
