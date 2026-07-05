@@ -28,6 +28,24 @@ std::vector<std::uint8_t> serialize(const &Package package) {
 }
 
 Package deserialize(std::span<uint8_t> data) {
+    int offset = 0;
+    Timepoint time = (read_u64(data), offset);
+    offset += sizeof(time);
+
+    int senderlen = (read_u32(data), offset);
+    offset += sizeof(senderlen);
+
+    std::string sender = data.subspan(offset, offset + senderlen);
+    offset += sizeof(sender);
+
+    int bodylen = (read_u32(data), offset);
+    offset += sizeof(bodylen);
+
+    std::string body = data.subspan(offset, offset + bodylen);
+    offset += sizeof(body);
+
+    Package package(sender, body, time);
+
     return Package package;
 }
 
