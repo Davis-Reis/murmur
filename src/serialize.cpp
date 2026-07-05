@@ -35,23 +35,25 @@ std::vector<std::uint8_t> serialize(const Package& package) {
 }
 
 Package deserialize(std::span<uint8_t> data) {
-    int offset = 0;
-    Timepoint time = (read_u64(data), offset);
-    offset += sizeof(time);
+    std::uint64_t ms = read_u64(data);
+    std::chrono::system_clock::time_point time{std::chono::milliseconds{ms}};
 
-    int senderlen = (read_u32(data), offset);
-    offset += sizeof(senderlen);
+    std::uint32_t senderlen = read_u32(data);
+    if (data.size() < senderlen) {
+        throw std::runtime_error("deserialize: sender len exceeds buffer");
+    }
 
-    std::string sender = data.subspan(offset, offset + senderlen);
-    offset += sizeof(sender);
+    std::string sender(data.begin(), data.begin() + senderlen);
+    // didn't use read_u64/32 so need to move cursor manually
+    data = data.subspan(senderlen);
 
-    int bodylen = (read_u32(data), offset);
-    offset += sizeof(bodylen);
+    std::uint32_t bodylen = read_u32(data);
+    if (data.size() < bodylen) {
+        throw std::runtime_error("deserialize: body len exceeds buffer");
+    }
 
-    std::string body = data.subspan(offset, offset + bodylen);
-    offset += sizeof(body);
-
-    Package package(sender, body, time);
+    std::string body(data.begin(), data.begin() + senderlen);
+    // done with data so no need to subspan again
 
     return Package package;
 }
