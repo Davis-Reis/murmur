@@ -22,14 +22,10 @@ public:
 
     TimePoint timestamp() const noexcept;
 
-    std::vector<std::uint8_t> serialize() const;
-
-    static Package deserialize(const std::uint8_t* data, std::size_t size);
-
 private:
+    TimePoint timestamp_{Clock::now()};
     std::string sender_;
     std::string body_;
-    TimePoint timestamp_{Clock::now()};
 };
 
 } // namespace murmur
