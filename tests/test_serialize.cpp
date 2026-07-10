@@ -11,19 +11,23 @@ int main() {
 
     std::string testSender = "testUser";
     std::string testBody = "Hello, World!";
-    Clock::time_point timeStamp = Clock::now();
-    Package testPack = Package(testSender, testBody, timeStamp);
+    Package testPack = Package(testSender, testBody);
 
     // Serialize testing
 
-    std::vector<std::uint8_t> serialized = serialize(&testPack);
+    auto serialized = serialize(&testPack);
     Package deserialized = deserialize(serialized);
 
-    assert(testSender == deserialized.sender());
-    assert(testBody == deserialized.body());
-    assert(timeStamp == deserialized.timeStamp());
+    assert(testPack.sender() == deserialized.sender());
+    assert(testPack.body() == deserialized.body());
+    assert(testPack.timeStramp() == deserialized.timeStamp());
 
-    // 
+    // Raw append testing
+
+    std::vector<std::uint32_t> buf;
+    u32_append(buf, 0x12345678);
+    assert(buf.size == 4);
+    assert(buf[0] == 0x12 && buf[1] == 0x34 && buf[2] == 0x56 && buf[3] == 0x78);
 }
 
 } // namespace murmur
