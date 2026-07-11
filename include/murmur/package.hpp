@@ -4,6 +4,7 @@
 #include <chrono>
 #include <vector>
 #include <cstdint>
+#include <print>
 
 namespace murmur {
 
@@ -13,17 +14,24 @@ public:
     using TimePoint = Clock::time_point;
 
     Package() = default;
-    Package(std::string sender, std::string body);
-    Package(std::string sender, std::string body, TimePoint timestamp);
+    Package(std::string sender, std::string body) :
+        sender_(std::move(sender)), body_(std::move(body)) {}
+    Package(std::string sender, std::string body, TimePoint timestamp) :
+        sender_(std::move(sender)), body_(std::move(body)), timestamp_(timestamp) {}
 
-    const std:string& sender() const noexcept;
 
-    const std::string& body() const noexcept;
+    const std::string& sender() const noexcept { return sender_; }
 
-    TimePoint timestamp() const noexcept;
+    const std::string& body() const noexcept { return body_; }
+
+    TimePoint timeStamp() const noexcept { return timestamp_; }
+
+    void stamp() { timestamp_ = Clock::now(); }
+
+    void printPackage() { println("{}", sender_); println("{}", body_); }
 
 private:
-    TimePoint timestamp_{Clock::now()};
+    TimePoint timestamp_;
     std::string sender_;
     std::string body_;
 };

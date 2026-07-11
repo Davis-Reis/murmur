@@ -1,6 +1,6 @@
 #include "serialize.hpp"
 #include <span>
-#include <cstint>
+#include <cstdint>
 #include <stdexcept>
 
 namespace murmur {
@@ -12,51 +12,9 @@ namespace murmur {
 // [ uint32 message len ]                       | 4 bytes
 // [ message bytes ]                            | len bytes
 
-// Package to bytes
-std::vector<std::uint8_t> serialize(const Package& package) {
-    std::vector<std::uint8_t> out;
 
-    // Store the timepoint
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-            package.timestamp().time_since_epoch()).count();
-    append_u64(out, static_cast<std::uint64_t>(ms));
 
-    // Store the sender str len then str
-    const std::string& sender = package.sender();
-    append_u32(out, static_cast<std::uint32_t>(sender.size()));
-    out.insert(out.end(), sender.begin(), sender.end());
 
-    // Store the body str len then str
-    const std::string& body = package.body();
-    append_u32(out, static_cast<std::uint32_t>(body.size()));
-    out.insert(out.end(), body.begin(), body.end());
-
-    return out;
-}
-
-Package deserialize(std::span<uint8_t> data) {
-    std::uint64_t ms = read_u64(data);
-    std::chrono::system_clock::time_point time{std::chono::milliseconds{ms}};
-
-    std::uint32_t senderlen = read_u32(data);
-    if (data.size() < senderlen) {
-        throw std::runtime_error("deserialize: sender len exceeds buffer");
-    }
-
-    std::string sender(data.begin(), data.begin() + senderlen);
-    // didn't use read_u64/32 so need to move cursor manually
-    data = data.subspan(senderlen);
-
-    std::uint32_t bodylen = read_u32(data);
-    if (data.size() < bodylen) {
-        throw std::runtime_error("deserialize: body len exceeds buffer");
-    }
-
-    std::string body(data.begin(), data.begin() + senderlen);
-    // done with data so no need to subspan again
-
-    return Package package;
-}
 
 // Helper function to translate 32 bit into big endian and push onto out vector
 void append_u32(std::vector<std::uint8_t>& out, uint32_t x) {
@@ -79,7 +37,7 @@ void append_u64(std::vector<std::uint8_t>& out, uint64_t x) {
 }
 
 // Helper function to translate uint8 vector from network to host bytes
-std::uint32_t read_u32(std::vector<std::uint8_t> buf, std::size_t& offset) {
+std::uint32_t read_u32(std::span<uint8_t>& buf) {
     if (buf.size() < 4) {
         throw std::runtime_error("read_u32: buffer underrun");
     }
@@ -92,20 +50,65 @@ std::uint32_t read_u32(std::vector<std::uint8_t> buf, std::size_t& offset) {
 }
 
 // Helper function to translate uint8 vector from network to host bytes
-std::uint64_t read_u64(std::vector<std::uint8_t> buf, std::size_t& offset) {
+std::uint64_t read_u64(std::span<std::uint8_t>& buf) {
     if (buf.size() < 4) {
         throw std::runtime_error("read_u64: buffer underrun");
     }
-    std::uint32_t result = (static_cast<std::uint32_t>(buf[0]) << 56)
-    | (static_cast<std::uint32_t>(buf[1]) << 48)
-    | (static_cast<std::uint32_t>(buf[2]) << 40)
-    | (static_cast<std::uint32_t>(buf[3]) << 32)
-    | (static_cast<std::uint32_t>(buf[4]) << 24)
-    | (static_cast<std::uint32_t>(buf[5]) << 16)
-    | (static_cast<std::uint32_t>(buf[6]) << 8 )
-    | (static_cast<std::uint32_t>(buf[7]) << 0 );
+    std::uint64_t result = (static_cast<std::uint64_t>(buf[0]) << 56)
+    | (static_cast<std::uint64_t>(buf[1]) << 48)
+    | (static_cast<std::uint64_t>(buf[2]) << 40)
+    | (static_cast<std::uint64_t>(buf[3]) << 32)
+    | (static_cast<std::uint64_t>(buf[4]) << 24)
+    | (static_cast<std::uint64_t>(buf[5]) << 16)
+    | (static_cast<std::uint64_t>(buf[6]) << 8 )
+    | (static_cast<std::uint64_t>(buf[7]) << 0 );
     buf = buf.subspan(8);
     return result;
 }
-    
+// Package to bytes
+std::vector<std::uint8_t> serialize(const Package& package) {
+    std::vector<std::uint8_t> out;
+
+    // Store the timepoint
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            package.timeStamp().time_since_epoch()).count();
+    append_u64(out, static_cast<std::uint64_t>(ms));
+
+    // Store the sender str len then str
+    const std::string& sender = package.sender();
+    append_u32(out, static_cast<std::uint32_t>(sender.size()));
+    out.insert(out.end(), sender.begin(), sender.end());
+
+    // Store the body str len then str
+    const std::string& body = package.body();
+    append_u32(out, static_cast<std::uint32_t>(body.size()));
+    out.insert(out.end(), body.begin(), body.end());
+
+    return out;
+}   
+
+Package deserialize(std::span<uint8_t> data) {
+    std::uint64_t ms = read_u64(data);
+    std::chrono::system_clock::time_point time{std::chrono::milliseconds{ms}};
+
+    std::uint32_t senderlen = read_u32(data);
+    if (data.size() < senderlen) {
+        throw std::runtime_error("deserialize: sender len exceeds buffer");
+    }
+
+    std::string sender(data.begin(), data.begin() + senderlen);
+    // didn't use read_u64/32 so need to move cursor manually
+    data = data.subspan(senderlen);
+
+    std::uint32_t bodylen = read_u32(data);
+    if (data.size() < bodylen) {
+        throw std::runtime_error("deserialize: body len exceeds buffer");
+    }
+
+    std::string body(data.begin(), data.begin() + bodylen);
+    // done with data so no need to subspan again
+
+    return Package(sender, body, time);
+}
+
 } // namespace
