@@ -37,7 +37,7 @@ void append_u64(std::vector<std::uint8_t>& out, uint64_t x) {
 }
 
 // Helper function to translate uint8 vector from network to host bytes
-std::uint32_t read_u32(std::span<uint8_t>& buf) {
+std::uint32_t read_u32(std::span<const std::uint8_t>& buf) {
     if (buf.size() < 4) {
         throw std::runtime_error("read_u32: buffer underrun");
     }
@@ -50,7 +50,7 @@ std::uint32_t read_u32(std::span<uint8_t>& buf) {
 }
 
 // Helper function to translate uint8 vector from network to host bytes
-std::uint64_t read_u64(std::span<std::uint8_t>& buf) {
+std::uint64_t read_u64(std::span<const std::uint8_t>& buf) {
     if (buf.size() < 4) {
         throw std::runtime_error("read_u64: buffer underrun");
     }
@@ -87,7 +87,7 @@ std::vector<std::uint8_t> serialize(const Package& package) {
     return out;
 }   
 
-Package deserialize(std::span<uint8_t> data) {
+Package deserialize(std::span<const std::uint8_t> data) {
     std::uint64_t ms = read_u64(data);
     std::chrono::system_clock::time_point time{std::chrono::milliseconds{ms}};
 
