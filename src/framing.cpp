@@ -1,9 +1,12 @@
 #include "framing.hpp"
 #include <stdexcept>
-#include <vector>
+#include <arpa/inet.h>
 
 
 namespace murmur {
+
+
+using socpp::Socket;
 
     void write_framed(Socket& sock, std::span<const std::uint8_t> data){
         if (data.size() > MAX_MESSAGE) {
@@ -15,10 +18,13 @@ namespace murmur {
         sock.write_all(data.data(), data.size());
     }
 
-    std::vector<std::uint8_t> read_framed(Socket& sock) {
+    std::optional<std::vector<std::uint8_t>> read_framed(Socket& sock) {
         // Read the header to see how big the next message is
         std::uint32_t header;
-        sock.read_exact(&header, sizeof(header));
+
+        if (!sock.read_exact(&header, sizeof(header))) {
+                return std::nullopt;
+        }
         std::uint32_t len = ntohl(header);
 
         if (len > MAX_MESSAGE) {
@@ -27,7 +33,9 @@ namespace murmur {
 
         // Store message after header with size specified in header
         std::vector<std::uint8_t> buffer(len);
-        sock.read_exact(buffer.data(), len);
+        if (!sock.read_exact(buffer.data(), len)) {
+            throw socpp::ConnectionError("read_framed: connection closed after header");
+        }
 
         return buffer;
     }
